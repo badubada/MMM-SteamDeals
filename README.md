@@ -2,6 +2,7 @@
 
 A MagicMirror² module that displays current Steam deals fetched from the free **CheapShark API**. Built as a companion to **MMM-SteamUpcoming**, it reuses the same genre filter, country/region filter, rotation, and visual design.  
 No API key required.
+This module was vibe coded with Anthropic's Claude AI - Sonnet 4.6. Please feel free to adapt it / improve it / make suggestions.
 
 ---
 
