@@ -19,7 +19,7 @@ No API key required.
 - **Minimum Steam / Metacritic rating** filters
 - **Automatic rotation** – cycles through all loaded deals
 - Game covers, discount badge, page indicator
-- **Language support**: `"en"` or `"de"` UI strings
+- **Language support**: `"en"` or `"de"`
 - Fully configurable via `config.js`
 
 ---
