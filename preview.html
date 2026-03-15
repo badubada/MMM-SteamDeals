@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MMM-SteamDeals – Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Page chrome – simulates a MagicMirror dark background ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0e0e10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 48px 24px;
+    font-family: "Rajdhani", "Segoe UI", sans-serif;
+  }
+
+  .preview-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.18);
+  }
+
+  .mirror-frame {
+    background: #111214;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 28px 24px;
+    width: 380px;
+    position: relative;
+  }
+
+  /* ── Module styles (1:1 copy of MMM-SteamDeals.css) ── */
+  .mmm-steamdeals {
+    font-family: "Rajdhani", "Segoe UI", sans-serif;
+    color: #c6d4df;
+    width: 100%;
+  }
+
+  .sd-header {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #66c0f4;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(102,192,244,0.25);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sd-logo { color: #1b9de2; font-size: 10px; }
+
+  .sd-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sd-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    border-left: 2px solid rgba(102,192,244,0.3);
+    opacity: 0;
+    animation: sdFadeIn 0.4s ease forwards;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .sd-item:hover { border-left-color: #66c0f4; background: rgba(102,192,244,0.07); }
+  @keyframes sdFadeIn {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .sd-cover {
+    width: 56px;
+    height: 26px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+    opacity: 0.9;
+    background: rgba(255,255,255,0.07);
+  }
+
+  .sd-info { flex: 1; min-width: 0; }
+
+  .sd-title {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #e8eef2;
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+
+  .sd-scores { display: flex; gap: 4px; margin-bottom: 3px; }
+  .sd-score-badge { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; border-radius: 2px; padding: 1px 5px; }
+  .sd-score-steam.sd-score-positive { background: rgba(164,208,7,0.15);   color: #a4d007; border: 1px solid rgba(164,208,7,0.3); }
+  .sd-score-steam.sd-score-mixed    { background: rgba(196,156,10,0.15);  color: #c49c0a; border: 1px solid rgba(196,156,10,0.3); }
+  .sd-score-steam.sd-score-negative { background: rgba(220,80,50,0.15);   color: #dc5032; border: 1px solid rgba(220,80,50,0.3); }
+  .sd-score-meta.sd-score-positive  { background: rgba(90,170,40,0.15);   color: #7ab832; border: 1px solid rgba(90,170,40,0.3); }
+  .sd-score-meta.sd-score-mixed     { background: rgba(220,150,0,0.15);   color: #d89200; border: 1px solid rgba(220,150,0,0.3); }
+  .sd-score-meta.sd-score-negative  { background: rgba(190,50,30,0.15);   color: #be321e; border: 1px solid rgba(190,50,30,0.3); }
+
+  .sd-genres { display: flex; gap: 4px; margin-bottom: 3px; }
+  .sd-genre-tag {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #7ca9c4;
+    background: rgba(102,192,244,0.1); border: 1px solid rgba(102,192,244,0.2);
+    border-radius: 2px; padding: 1px 4px;
+  }
+
+  .sd-prices { display: flex; align-items: center; gap: 6px; }
+  .sd-sale-price   { font-size: 13px; font-weight: 700; color: #a4d007; }
+  .sd-normal-price { font-size: 11px; color: #6a8a9f; text-decoration: line-through; }
+  .sd-badge {
+    font-size: 11px; font-weight: 700;
+    background: #4c6b22; color: #a4d007;
+    padding: 1px 5px; border-radius: 2px; letter-spacing: 0.03em;
+  }
+
+  .sd-rotation-indicator {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 10px; gap: 12px;
+  }
+  .sd-page-dots { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .sd-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(102,192,244,0.25);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .sd-dot-active { background: #66c0f4; transform: scale(1.35); }
+
+  .sd-countdown { display: flex; align-items: center; gap: 7px; flex: 1; justify-content: flex-end; }
+  .sd-countdown-label {
+    font-size: 10px; font-weight: 600; color: #66c0f4; opacity: 0.65;
+    letter-spacing: 0.05em; min-width: 22px; text-align: right;
+  }
+  .sd-countdown-track {
+    flex: 1; height: 2px; background: rgba(102,192,244,0.15);
+    border-radius: 1px; overflow: hidden; max-width: 120px;
+  }
+  .sd-countdown-bar { height: 100%; background: #66c0f4; border-radius: 1px; transition: width 0.9s linear; }
+
+  .sd-footer { font-size: 10px; opacity: 0.3; margin-top: 8px; letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<div class="preview-label">MMM-SteamDeals &mdash; Live Preview</div>
+
+<div class="mirror-frame">
+  <div class="mmm-steamdeals" id="module"></div>
+</div>
+
+<div class="preview-label">country: "DE" &nbsp;|&nbsp; genres: ["Action", "RPG"] &nbsp;|&nbsp; rotation: 8s</div>
+
+<script>
+// ── Sample deal data ──────────────────────────────────────────────────────────
+const PAGES = [
+  [
+    {
+      title: "Cyberpunk 2077",
+      localPrice: "€14.99", localNormalPrice: "€59.99",
+      savings: "74.98",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/capsule_sm_120.jpg",
+      genres: ["RPG", "Open World"],
+      steamRatingPercent: "82", steamRatingText: "Very Positive",
+      metacriticScore: "86",
+    },
+    {
+      title: "Elden Ring",
+      localPrice: "€29.99", localNormalPrice: "€59.99",
+      savings: "50.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/capsule_sm_120.jpg",
+      genres: ["Action", "RPG"],
+      steamRatingPercent: "96", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "95",
+    },
+    {
+      title: "DOOM Eternal",
+      localPrice: "€7.99", localNormalPrice: "€39.99",
+      savings: "80.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/782330/capsule_sm_120.jpg",
+      genres: ["Action", "Shooter"],
+      steamRatingPercent: "88", steamRatingText: "Very Positive",
+      metacriticScore: "88",
+    },
+    {
+      title: "Monster Hunter: World",
+      localPrice: "€9.99", localNormalPrice: "€29.99",
+      savings: "66.67",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/582010/capsule_sm_120.jpg",
+      genres: ["Action", "RPG"],
+      steamRatingPercent: "90", steamRatingText: "Very Positive",
+      metacriticScore: "90",
+    },
+    {
+      title: "Hades",
+      localPrice: "€6.24", localNormalPrice: "€24.99",
+      savings: "75.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1145360/capsule_sm_120.jpg",
+      genres: ["Action", "Roguelite"],
+      steamRatingPercent: "97", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "93",
+    },
+  ],
+  [
+    {
+      title: "The Witcher 3: Wild Hunt",
+      localPrice: "€7.99", localNormalPrice: "€39.99",
+      savings: "80.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/292030/capsule_sm_120.jpg",
+      genres: ["RPG", "Open World"],
+      steamRatingPercent: "97", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "92",
+    },
+    {
+      title: "Sekiro: Shadows Die Twice",
+      localPrice: "€29.99", localNormalPrice: "€59.99",
+      savings: "50.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/814380/capsule_sm_120.jpg",
+      genres: ["Action", "Adventure"],
+      steamRatingPercent: "93", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "90",
+    },
+    {
+      title: "Deep Rock Galactic",
+      localPrice: "€7.49", localNormalPrice: "€29.99",
+      savings: "75.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/548430/capsule_sm_120.jpg",
+      genres: ["Action", "Co-op"],
+      steamRatingPercent: "98", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "85",
+    },
+    {
+      title: "Disco Elysium",
+      localPrice: "€8.99", localNormalPrice: "€39.99",
+      savings: "77.50",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/632470/capsule_sm_120.jpg",
+      genres: ["RPG", "Adventure"],
+      steamRatingPercent: "97", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "97",
+    },
+    {
+      title: "Hollow Knight",
+      localPrice: "Free", localNormalPrice: null,
+      savings: "100.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/367520/capsule_sm_120.jpg",
+      genres: ["Action", "Platformer"],
+      steamRatingPercent: "98", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "87",
+    },
+  ],
+  [
+    {
+      title: "Baldur's Gate 3",
+      localPrice: "€44.99", localNormalPrice: "€59.99",
+      savings: "25.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/capsule_sm_120.jpg",
+      genres: ["RPG", "Strategy"],
+      steamRatingPercent: "97", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "96",
+    },
+    {
+      title: "Red Dead Redemption 2",
+      localPrice: "€19.99", localNormalPrice: "€59.99",
+      savings: "66.67",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/capsule_sm_120.jpg",
+      genres: ["Action", "Open World"],
+      steamRatingPercent: "90", steamRatingText: "Very Positive",
+      metacriticScore: "93",
+    },
+    {
+      title: "Ghostwire: Tokyo",
+      localPrice: "€7.99", localNormalPrice: "€39.99",
+      savings: "80.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1475810/capsule_sm_120.jpg",
+      genres: ["Action", "Adventure"],
+      steamRatingPercent: "79", steamRatingText: "Mostly Positive",
+      metacriticScore: "72",
+    },
+    {
+      title: "Resident Evil Village",
+      localPrice: "€14.99", localNormalPrice: "€39.99",
+      savings: "62.50",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/1196590/capsule_sm_120.jpg",
+      genres: ["Action", "Horror"],
+      steamRatingPercent: "87", steamRatingText: "Very Positive",
+      metacriticScore: "84",
+    },
+    {
+      title: "Outer Wilds",
+      localPrice: "€11.24", localNormalPrice: "€22.49",
+      savings: "50.00",
+      thumb: "https://cdn.cloudflare.steamstatic.com/steam/apps/753640/capsule_sm_120.jpg",
+      genres: ["Adventure", "Indie"],
+      steamRatingPercent: "96", steamRatingText: "Overwhelmingly Positive",
+      metacriticScore: "85",
+    },
+  ],
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const INTERVAL_SEC = 8;
+let currentPage   = 0;
+let secondsLeft   = INTERVAL_SEC;
+let rotationTimer = null;
+let countdownTimer = null;
+const lastUpdated  = new Date();
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function steamTier(pct) {
+  const p = parseInt(pct);
+  return p >= 80 ? "positive" : p >= 60 ? "mixed" : "negative";
+}
+function metaTier(score) {
+  const s = parseInt(score);
+  return s >= 75 ? "positive" : s >= 50 ? "mixed" : "negative";
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const module = document.getElementById("module");
+  const deals  = PAGES[currentPage];
+
+  let html = `
+    <div class="sd-header"><span class="sd-logo">&#9654;</span> Steam Deals</div>
+    <ul class="sd-list">`;
+
+  deals.forEach((deal, idx) => {
+    const delay = idx * 80;
+
+    // Score badges
+    let scoreBadges = "";
+    if (deal.steamRatingPercent && parseInt(deal.steamRatingPercent) > 0) {
+      const tier = steamTier(deal.steamRatingPercent);
+      scoreBadges += `<span class="sd-score-badge sd-score-steam sd-score-${tier}" title="${deal.steamRatingText}">♥ ${deal.steamRatingPercent}%</span>`;
+    }
+    if (deal.metacriticScore && parseInt(deal.metacriticScore) > 0) {
+      const tier = metaTier(deal.metacriticScore);
+      scoreBadges += `<span class="sd-score-badge sd-score-meta sd-score-${tier}" title="Metacritic">MC ${deal.metacriticScore}</span>`;
+    }
+
+    // Genre tags
+    const genreTags = (deal.genres || []).slice(0, 2)
+      .map(g => `<span class="sd-genre-tag">${g}</span>`).join("");
+
+    // Price
+    const salePrice   = deal.localPrice === "Free"
+      ? "Free"
+      : deal.localPrice;
+    const normalPrice = deal.localNormalPrice
+      ? `<span class="sd-normal-price">${deal.localNormalPrice}</span>` : "";
+    const savingsBadge = deal.savings && parseFloat(deal.savings) > 0
+      ? `<span class="sd-badge">-${Math.round(parseFloat(deal.savings))}%</span>` : "";
+
+    html += `
+      <li class="sd-item" style="animation-delay:${delay}ms">
+        <img class="sd-cover" src="${deal.thumb}" alt="${deal.title}" onerror="this.style.display='none'">
+        <div class="sd-info">
+          <div class="sd-title">${deal.title}</div>
+          ${scoreBadges ? `<div class="sd-scores">${scoreBadges}</div>` : ""}
+          ${genreTags  ? `<div class="sd-genres">${genreTags}</div>` : ""}
+          <div class="sd-prices">
+            <span class="sd-sale-price">${salePrice}</span>
+            ${normalPrice}
+            ${savingsBadge}
+          </div>
+        </div>
+      </li>`;
+  });
+
+  // Page dots
+  const dots = PAGES.map((_, i) =>
+    `<span class="sd-dot${i === currentPage ? " sd-dot-active" : ""}"></span>`
+  ).join("");
+
+  // Countdown bar (current width based on secondsLeft)
+  const barPct = (secondsLeft / INTERVAL_SEC) * 100;
+
+  const timeStr = lastUpdated.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
+  html += `
+    </ul>
+    <div class="sd-rotation-indicator">
+      <div class="sd-page-dots">${dots}</div>
+      <div class="sd-countdown">
+        <span class="sd-countdown-label" id="cd-label">${secondsLeft}s</span>
+        <div class="sd-countdown-track">
+          <div class="sd-countdown-bar" id="cd-bar" style="width:${barPct}%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sd-footer">Updated: ${timeStr}</div>`;
+
+  module.innerHTML = html;
+}
+
+function updateCountdown() {
+  secondsLeft = Math.max(0, secondsLeft - 1);
+  const label = document.getElementById("cd-label");
+  const bar   = document.getElementById("cd-bar");
+  if (label) label.textContent = secondsLeft + "s";
+  if (bar)   bar.style.width   = ((secondsLeft / INTERVAL_SEC) * 100) + "%";
+}
+
+function nextPage() {
+  currentPage  = (currentPage + 1) % PAGES.length;
+  secondsLeft  = INTERVAL_SEC;
+  clearInterval(countdownTimer);
+  render();
+  setTimeout(() => {
+    countdownTimer = setInterval(updateCountdown, 1000);
+  }, 100);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+render();
+countdownTimer = setInterval(updateCountdown, 1000);
+rotationTimer  = setInterval(nextPage, INTERVAL_SEC * 1000);
+</script>
+</body>
+</html>
