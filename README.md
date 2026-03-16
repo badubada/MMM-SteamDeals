@@ -29,7 +29,7 @@ This module was vibe coded with Anthropic's Claude AI - Sonnet 4.6. Please feel 
 
 ```bash
 cd ~/MagicMirror/modules
-git clone https://github.com/YOUR_USER/MMM-SteamDeals.git
+git clone https://github.com/badubada/MMM-SteamDeals.git
 # No npm install needed on Node 18+ (native fetch is used).
 # Only required for Node < 18:
 # cd MMM-SteamDeals && npm install node-fetch@2
